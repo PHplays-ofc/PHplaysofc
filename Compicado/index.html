@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Painel da Nave</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="painel">
+    <h1 class="titulo">🚀 COMANDO DA NAVE</h1>
+
+    <div class="telas">
+      <div class="tela-sistema">
+        <h2>Sistema Central</h2>
+        <div class="scanner"></div>
+        <p class="status pisca">ONLINE</p>
+      </div>
+
+      <div class="tela-comandos">
+        <h2>Comandos</h2>
+        <button class="botao" onclick="escrever('Motores ativando.')">Ativar Motor</button>
+        <button class="botao" id="Auto-Destruição" onclick="escrever('Auto Destruição ligada')">Auto-Destruição</button>
+        <button class="botao" onclick="escrever('camuflagem ativada')">Modo Camuflagem</button>
+        <button class="botao" onclick="escrever('luzes acesas')">Ligar Luzes</button>
+        <button class="botao" id="lancar" ondblclick="lancar()" onclick="escrever('Foguetes lançados')">Lançar Foguete</button>
+        
+      </div>
+      <img  src="https://www.pngarts.com/files/4/Rocket-PNG-Photo.png" class="foguetovisk">
+
+      <div class="tela-alerta">
+        <h2>Alertas</h2>
+        <p class="alerta">⚠️ Campo de asteroides detectado!</p>
+      </div>
+
+      <div class="tela-terminal">
+        <h2>Terminal</h2>
+        <div class="terminal">
+          <p>> Inicializando sistemas...</p>
+          <p>> Verifican/o propulsão...</p>
+          <p>> Propulsão OK</p>
+          <p>> Escudos: ATIVOS</p>
+        </div>
+      </div>
+
+      <div class="tela-combustivel">
+        <h2>Combustível</h2>
+        <div class="barra">
+          <div class="nivel"></div>
+        </div>
+        <p>>> NIVC</p>
+      </div>
+
+      <div class="tela-mapa">
+        <h2>Mapa Galáctico</h2>
+        <div class="grid">
+          <div class="ponto ativo"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js" defer></script>
+
+
+</body>
+</html>

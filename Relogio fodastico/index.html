@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
+    <title>Relógio Digital</title>
+</head>
+
+<body>
+    <div class="panel">
+        <header>
+            <div class="title">
+                <div class="logo">CY</div>
+                <div>
+                    <h1>Relógio Cypher</h1>
+                    <p class="sub">Digital · Minimal · Futurista</p>
+                </div>
+            </div>
+            <div class="controls">
+                <button class="btn" id="toggleFormat" title="Alternar 12/24">24h</button>
+                <button class="btn" id="toggleSeconds" title="Mostrar/ocultar segundos">Seg</button>
+            </div>
+        </header>
+
+        <div class="clock-wrap"></div>
+        <div class="display">
+            <div class="time" id="time" data-time="00:00:00">
+                <div class="hhmm" id="hhmm">00:00</div>
+                <div class="secs" id="secs"></div>:00
+            </div>
+            <div class="ampm" id="ampm"></div>
+        </div>
+        <div class="meta">
+            <div class="chip" id="weekday">segunda-feira</div>
+            <div class="chip" id="date">01 Jan 1970</div>
+        </div>
+        <div class="scanline"></div>
+    </div>
+
+    <aside class="side">
+        <div class="matrix" id="matrix">
+            <p>&gt; Sistema: online</p>
+            <p>&gt; Sincronizando NTP...</p>
+            <p>&gt; Última atualização: —</p>
+        </div>
+    </aside>
+    </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Jogo de Carro – Desvie e Sobreviva</title>
+  <style>
+    :root {
+      --w: 360px;
+      --h: 600px;
+      --lane: 3;
+      --gap: 6px;
+      --bg: #111;
+      --track: #1c1c1c;
+      --dash: rgba(255,255,255,0.6);
+      --ui: #ffffff;
+      --accent: #7c3aed;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at 20% 10%, #0b0b14 0%, #050507 40%, #000 100%);
+      color: var(--ui);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial;
+    }
+
+    .wrap { display: grid; gap: 10px; justify-items: center; }
+    h1 { font-size: 18px; font-weight: 700; margin: 0 0 6px; opacity: .9; }
+    .hint { font-size: 13px; opacity: .75; margin-bottom: 10px; text-align: center; }
+
+    .game {
+      position: relative;
+      width: var(--w);
+      height: var(--h);
+      overflow: hidden;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.5), inset 0 0 0 2px rgba(255,255,255,.05);
+      background:
+        repeating-linear-gradient(
+          to bottom,
+          transparent 0 30px,
+          var(--dash) 30px calc(30px + var(--gap)),
+          transparent calc(30px + var(--gap)) 60px
+        );
+      background-color: var(--track);
+      isolation: isolate;
+    }
+
+    .game::before {
+      content: "";
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(to right, rgba(255,255,255,.25), rgba(255,255,255,0) 2px) left/2px 100% no-repeat,
+        linear-gradient(to left, rgba(255,255,255,.25), rgba(255,255,255,0) 2px) right/2px 100% no-repeat;
+      mix-blend-mode: screen;
+      z-index: 1;
+    }
+
+    .scroll { animation: road 0.7s linear infinite; }
+    @keyframes road { to { background-position-y: 60px; } }
+
+    .car, .enemy {
+      position: absolute;
+      user-select: none;
+      pointer-events: none;
+      will-change: transform;
+    }
+    .enemy {
+            transform: rotate(180deg);
+        }
+    .hud {
+      position: absolute; top: 8px; left: 8px; right: 8px;
+      display: flex; justify-content: space-between;
+      z-index: 3;
+      font-size: 14px;
+    }
+    .badge {
+      background: rgba(0,0,0,.35);
+      padding: 6px 10px; border-radius: 999px;
+      backdrop-filter: blur(6px);
+      border: 1px solid rgba(255,255,255,.1);
+    }
+    .badge strong { color: var(--accent); }
+
+    .controls {
+      position: absolute; inset: auto 0 0 0; height: 80px;
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 8px;
+      z-index: 4;
+    }
+    .btn {
+      border: 0; border-radius: 14px; font-weight: 700; font-size: 14px;
+      background: rgba(124,58,237,.15);
+      color: #fff; box-shadow: inset 0 0 0 1px rgba(124,58,237,.5);
+      backdrop-filter: blur(6px);
+      cursor: pointer; padding: 10px 12px;
+      transition: transform .06s ease;
+    }
+    .btn:active { transform: scale(.97); }
+
+    .overlay {
+      position: absolute; inset: 0; display: grid; place-items: center;
+      background: rgba(0,0,0,.6); z-index: 10; visibility: hidden; opacity: 0;
+      transition: opacity .2s ease, visibility .2s ease;
+    }
+    .overlay.show { visibility: visible; opacity: 1; }
+
+    .modal {
+      width: 80%; max-width: 320px; text-align: center;
+      background: #0f0b17; border: 1px solid rgba(255,255,255,.08);
+      border-radius: 16px; padding: 18px 16px;
+    }
+    .modal h2 { margin: 0 0 6px; font-size: 20px; }
+    .modal p { margin: 0 0 14px; opacity: .85; }
+    .modal .restart { width: 100%; }
+
+    @media (max-width: 420px) {
+      :root { --w: 320px; --h: 560px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Jogo de Carro – Desvie dos inimigos</h1>
+    <div class="hint">Setas ◀ ▶ ou A / D (botões na tela no celular). Não bata!</div>
+
+    <div id="game" class="game scroll">
+      <div class="hud">
+        <div class="badge">Pontuação: <strong id="score">0</strong></div>
+        <div class="badge">Velocidade: <strong id="spd">1.0x</strong></div>
+      </div>
+
+      <img id="player" class="car" alt="Seu carro" />
+
+      <div class="controls">
+        <button class="btn" id="leftBtn">◀ Esquerda</button>
+        <button class="btn" id="rightBtn">Direita ▶</button>
+      </div>
+
+      <div id="overlay" class="overlay">
+        <div class="modal">
+          <h2>Você perdeu!</h2>
+          <p>Seu carro colidiu. Quer tentar de novo?</p>
+          <button class="btn restart" id="restartBtn">Reiniciar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SPRITES = {
+      player: " https://static.vecteezy.com/system/resources/previews/009/380/400/non_2x/car-top-view-clipart-design-illustration-free-png.png",
+      enemies: [
+        "https://www.posteko.com.br/wp-content/uploads/2022/05/Carro-Posteko.png"
+      ]
+    };
+
+    const game = document.getElementById('game');
+    const player = document.getElementById('player');
+    const scoreEl = document.getElementById('score');
+    const spdEl = document.getElementById('spd');
+    const overlay = document.getElementById('overlay');
+    const restartBtn = document.getElementById('restartBtn');
+    const leftBtn = document.getElementById('leftBtn');
+    const rightBtn = document.getElementById('rightBtn');
+
+    const state = {
+      running: true,
+      laneX: [],
+      laneIndex: 1,
+      speed: 3.0,
+      speedFactor: 1.0,
+      enemies: [],
+      spawnTimer: 0,
+      score: 0,
+      lastTime: 0,
+      raf: null,
+    };
+
+    function setup() {
+      const w = game.clientWidth;
+      const lanes = 3;
+      const margin = 24;
+      const usable = w - margin * 2;
+      const laneWidth = usable / lanes;
+      state.laneX = Array.from({ length: lanes }, (_, i) => Math.round(margin + laneWidth * i + laneWidth / 2));
+
+      player.src = SPRITES.player;
+      player.style.width = Math.round(w * 0.26) + 'px';
+      player.style.height = Math.round(game.clientHeight * 0.18) + 'px';
+      player.style.bottom = '14px';
+      positionPlayer();
+
+      state.enemies.forEach(e => e.el.remove());
+      state.enemies = [];
+      state.score = 0;
+      state.speedFactor = 1.0;
+      updateHUD();
+
+      state.running = true;
+      overlay.classList.remove('show');
+      game.classList.add('scroll');
+      state.lastTime = performance.now();
+      state.raf = requestAnimationFrame(loop);
+    }
+
+    function positionPlayer() {
+      const x = state.laneX[state.laneIndex];
+      const carW = player.clientWidth;
+      player.style.left = Math.round(x - carW / 2) + 'px';
+    }
+
+    function updateHUD() {
+      scoreEl.textContent = Math.floor(state.score);
+      spdEl.textContent = state.speedFactor.toFixed(1) + 'x';
+    }
+
+    function spawnEnemy() {
+      const img = document.createElement('img');
+      img.className = 'enemy';
+      img.alt = 'Carro inimigo';
+      img.src = SPRITES.enemies[Math.floor(Math.random() * SPRITES.enemies.length)];
+
+      let lane;
+      do {
+        lane = Math.floor(Math.random() * state.laneX.length);
+      } while (state.enemies.length > 0 && lane === state.enemies[state.enemies.length - 1].lane);
+
+      const scale = 0.22 + Math.random() * 0.06;
+      img.style.width = Math.round(game.clientWidth * scale) + 'px';
+      img.style.position = 'absolute';
+      img.style.top = (-120 - Math.random() * 80) + 'px';
+      img.style.left = Math.round(state.laneX[lane] - img.width / 2) + 'px';
+
+      game.appendChild(img);
+
+      const enemy = { el: img, lane, y: -150, speed: state.speed * (1.1 + Math.random() * 0.8) * state.speedFactor };
+      state.enemies.push(enemy);
+    }
+
+    function rectsOverlap(a, b) {
+      return !(a.right < b.left || a.left > b.right || a.bottom < b.top || a.top > b.bottom);
+    }
+
+    function gameOver() {
+      state.running = false;
+      cancelAnimationFrame(state.raf);
+      overlay.classList.add('show');
+      game.classList.remove('scroll');
+    }
+
+    function loop(now) {
+      if (!state.running) return;
+      const dt = Math.min(32, now - state.lastTime);
+      state.lastTime = now;
+
+      state.speedFactor += 0.0006 * (dt / 16.67);
+      state.spawnTimer += dt;
+      const spawnEvery = 800 / state.speedFactor;
+      if (state.spawnTimer >= spawnEvery) {
+        state.spawnTimer = 0;
+        spawnEnemy();
+      }
+
+      const h = game.clientHeight;
+      const toRemove = [];
+      for (const e of state.enemies) {
+        e.y += (e.speed * (dt / 16.67));
+        e.el.style.transform = `translateY(${e.y}px)`;
+        const pr = player.getBoundingClientRect();
+        const er = e.el.getBoundingClientRect();
+        if (rectsOverlap(pr, er)) { gameOver(); break; }
+        if (e.y > h + 40) toRemove.push(e);
+      }
+
+      for (const e of toRemove) {
+        e.el.remove();
+        const idx = state.enemies.indexOf(e);
+        if (idx >= 0) state.enemies.splice(idx, 1);
+        state.score += 10 * state.speedFactor;
+      }
+
+      updateHUD();
+      state.raf = requestAnimationFrame(loop);
+    }
+
+    function moveLeft() { if (state.running) { state.laneIndex = Math.max(0, state.laneIndex - 1); positionPlayer(); } }
+    function moveRight() { if (state.running) { state.laneIndex = Math.min(state.laneX.length - 1, state.laneIndex + 1); positionPlayer(); } }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') moveLeft();
+      if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') moveRight();
+      if (!state.running && (e.key === 'Enter' || e.key === ' ')) restart();
+    });
+
+    leftBtn.addEventListener('click', moveLeft);
+    rightBtn.addEventListener('click', moveRight);
+    restartBtn.addEventListener('click', restart);
+
+    function restart() { setup(); }
+
+    player.addEventListener('load', () => { setTimeout(positionPlayer, 30); });
+    setup();
+
+    new ResizeObserver(() => {
+      const wasRunning = state.running;
+      cancelAnimationFrame(state.raf);
+      const w = game.clientWidth;
+      const lanes = state.laneX.length;
+      const margin = 24;
+      const usable = w - margin * 2;
+      const laneWidth = usable / lanes;
+      state.laneX = Array.from({ length: lanes }, (_, i) => Math.round(margin + laneWidth * i + laneWidth / 2));
+      player.style.width = Math.round(w * 0.26) + 'px';
+      player.style.height = Math.round(game.clientHeight * 0.18) + 'px';
+      positionPlayer();
+      if (wasRunning) state.raf = requestAnimationFrame(loop);
+    }).observe(game);
+  </script>
+</body>
+</html>

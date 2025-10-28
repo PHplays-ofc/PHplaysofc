@@ -1,0 +1,63 @@
+body {
+    font-family: sans-serif;
+    background: #222;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: .5s;
+    box-sizing: border-box;
+}
+
+.calculadora {
+    margin: 45% 0 0 0;
+    width: 45%;
+    background: #333;
+    padding: 15px;
+    border-radius: 10px;
+    position: static;
+}
+
+.tela {
+    background: black;
+    color: lime;
+    font-size: 25pt;
+    padding: 1rem;
+    text-align: right;
+    margin-bottom: 10%;
+    border-radius: 1rem;
+    transition: .5s;
+}
+
+.tela:hover{
+    background-color: lime;
+    color: black;
+    font-size: 30pt;
+}
+
+.botoes {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1%;
+}
+
+#igual{
+    grid-column-start: 3;
+    grid-column-end: 5;
+}
+
+button {
+    padding: 1rem;
+    font-size: 18pt;
+    border: none;
+    border-radius: 1rem;
+    cursor: pointer;
+    background: #555;
+    color: white;
+    transition: .5s;
+}
+
+button:hover {
+    background: lime;
+    color: black;
+}
