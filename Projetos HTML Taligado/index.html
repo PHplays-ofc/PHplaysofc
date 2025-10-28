@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FinancePro</title>
+  <link rel="stylesheet" href="styles/style.css">
+</head>
+
+<body>
+  <header>
+    <h1>💸 FinancePro</h1>
+  </header>
+  <main>
+    <section class="form-section"> <input id="desc" placeholder="Descrição"> <input id="valor" type="number"
+        placeholder="Valor"> <select id="tipo">
+        <option value="entrada">Entrada</option>
+        <option value="saida">Saída</option>
+      </select> <button id="addBtn">Adicionar</button> </section>
+    <section class="summary">
+      <h2>Resumo</h2>
+      <p>Saldo total: <span id="saldo">R$ 0,00</span></p>
+    </section>
+    <section class="grafico"> <canvas id="financeChart"></canvas> </section>
+    <section class="lista">
+      <h2>Transações</h2>
+      <ul id="transacoes"></ul>
+    </section>
+  </main>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="src/main.js" type="module"></script>
+</body>
+
+</html>
