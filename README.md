@@ -7,7 +7,7 @@
   <img src="https://github-readme-stats.vercel.app/api/top-langs?username=PHplays-ofc&locale=pt-br&hide_title=false&layout=compact&card_width=320&langs_count=12&theme=dracula&hide_border=true" height="163" alt="languages graph"  />
 </div>
 
-
+<img align="right" height="201" src="https://media0.giphy.com/media/7OH9z8lL8cnmkOxb6A/200.gif"  />
 
 <div align="left">
   <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/html5/html5-original.svg" height="30" alt="html5 logo"  />
